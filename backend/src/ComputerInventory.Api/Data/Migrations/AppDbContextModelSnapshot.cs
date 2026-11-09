@@ -71,6 +71,14 @@ namespace ComputerInventory.Api.Data.Migrations
 
                     b.HasIndex("ProcessorId");
 
+                    b.HasIndex("PsuWatts", "Id");
+
+                    b.HasIndex("RamMb", "Id");
+
+                    b.HasIndex("StorageCapacityGb", "Id");
+
+                    b.HasIndex("WeightGrams", "Id");
+
                     b.ToTable("Computers", t =>
                         {
                             t.HasCheckConstraint("CK_Computers_PsuWatts", "[PsuWatts] > 0");
@@ -98,6 +106,8 @@ namespace ComputerInventory.Api.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ComputerId", "PortType");
+
+                    b.HasIndex("PortType");
 
                     b.ToTable("ComputerUsbPorts", t =>
                         {

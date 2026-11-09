@@ -190,6 +190,39 @@ symbols and suffixes, and inconsistencies such as "SDD" or "R7360" corrected.
 can't drift apart), unique manufacturer names and unique models per manufacturer. The API validates first for
 clear messages; the database is the backstop.
 
+## Performance
+
+The list endpoint was measured against **500,000 computers** (3,000 processors, 1,500 graphics cards,
+1.2 million USB port rows), median of 5 warm requests through the API:
+
+| Scenario | Before | After | Why |
+|---|---|---|---|
+| Search, common term ("gtx") | 1,027 ms | **17 ms** | Text matched on the small component tables, then computers found by id |
+| Search, no matches | 3,037 ms | **7 ms** | Returns early: no computer queries at all |
+| Search, two terms ("intel radeon") | 1,144 ms | **137 ms** | Same, one id filter per term |
+| Sort by RAM | 301 ms | **36 ms** | Page of ids read from a `(RamMb, Id)` index, then details loaded for those ids |
+| Sort by processor | 995 ms | **378 ms** | Ids-first paging (names live in another table, so the sort itself remains) |
+| Filters + sort by PSU | 205 ms | **71 ms** | `(PsuWatts, Id)` index |
+| Has USB-C | 144 ms | **85 ms** | Index on USB port type |
+| First page, range filters, maker filter | 5–65 ms | unchanged | Already fast |
+
+What changed, and why:
+
+- **Search used `LIKE '%term%'` on every computer joined to its components**, for the count and again for the
+  page. A leading wildcard can't use an index, so every search scanned the whole table. Now each term is
+  matched against the processor and graphics card tables (a few thousand rows, ~5 ms), and computers are found
+  through their foreign-key indexes. If a term matches no component, the API answers without querying computers.
+- **Sorting a page sorted every column of every matching computer**, because EF puts the whole projection in the
+  paged subquery. Now the page's ids are fetched with a narrow query, then their details are loaded.
+- **Indexes on the sortable columns**, `(column, Id)`. Ties are broken by id *in the sort direction*, so one
+  index serves ascending and descending. The cost was measured too: about +0.03 ms per insert and ~57 MB for
+  500k computers, a good trade for a read-heavy catalogue. They were left out at first as speculative; the
+  measurements are what justified adding them.
+
+The rewritten queries are covered by the existing integration tests plus tests that compare search results with
+a plain in-memory filter, check paging order in both directions, and search with more matching components than
+SQL Server allows parameters.
+
 ## Design decisions and trade-offs
 
 | Decision | Why | Trade-off / when I'd change it |
@@ -198,7 +231,7 @@ clear messages; the database is the backstop.
 | **`int` identity keys** | Small, fast, ordered inserts; readable URLs | Guessable IDs: real protection is authorization (none here yet) and rate limiting; I'd add a separate public key if IDs had to be secret |
 | **Optimistic concurrency with `rowversion`** | No locks held while someone edits; conflicts surface as 409 with a way to reload | The user re-applies their change after a conflict |
 | **Timestamps set by an EF interceptor** | One place, testable with a fake clock | Writes that bypass the API wouldn't be stamped (SQL Server has no `ON UPDATE`; triggers would be the alternative) |
-| **Only foreign-key and unique indexes** | Range filters on low-cardinality columns rarely use single-column indexes | Add indexes from real query plans as data grows |
+| **Indexes only where measurements showed a win** | Each index costs writes and space; sortable columns and the USB type filter earned theirs (see Performance) | Review index usage stats in production and drop unused ones |
 | **Validation in three places** | Browser (instant feedback), API (authoritative, field-level messages), database (last line of defence) | Limits are duplicated in the frontend schema; an OpenAPI-generated client could share them |
 | **SPA calls the API directly, with CORS** | Frontend and API deploy independently | Needs the allowed origins configured per environment |
 | **Rate limiting per client IP** | Limits scraping and abuse | Behind a proxy, forwarded headers must be trusted for the real client IP |
