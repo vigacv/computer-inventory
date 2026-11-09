@@ -10,7 +10,6 @@ import { useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import { formatRam, formatWatts, formatWeight, type WeightUnit } from '../../utils/format'
 import { selectWeightUnit } from '../preferences/preferencesSlice'
-import { usePrefetch } from './computersApi'
 import { pageChanged, selectComputersQuery, sortChanged } from './computersQuerySlice'
 import { formatComponent, formatStorage, formatUsbPorts } from './labels'
 import type { ComputerSortField, ComputerSummary } from './types'
@@ -84,7 +83,6 @@ export function ComputerGrid({ rows, rowCount, loading, noRowsLabel }: ComputerG
   const query = useAppSelector(selectComputersQuery)
   const weightUnit = useAppSelector(selectWeightUnit)
   const { openDetails } = useComputerNavigation()
-  const prefetchDetails = usePrefetch('getComputer')
 
   const columns = useMemo(() => buildColumns(weightUnit, openDetails), [weightUnit, openDetails])
 
@@ -118,15 +116,6 @@ export function ComputerGrid({ rows, rowCount, loading, noRowsLabel }: ComputerG
       disableRowSelectionOnClick
       localeText={{ noRowsLabel }}
       onRowClick={({ row }) => openDetails(row.id)}
-      slotProps={{
-        row: {
-          // Start loading details on hover, so the drawer usually opens with data ready.
-          onMouseEnter: (event) => {
-            const id = Number(event.currentTarget.dataset.id)
-            if (id) prefetchDetails(id, { ifOlderThan: 60 })
-          },
-        },
-      }}
       sx={{ '& .MuiDataGrid-row': { cursor: 'pointer' } }}
       aria-label="Computers"
     />

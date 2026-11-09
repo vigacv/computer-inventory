@@ -18,4 +18,4 @@ export const computersApi = baseApi.injectEndpoints({
   }),
 })
 
-export const { useSearchComputersQuery, useGetComputerQuery, usePrefetch } = computersApi
+export const { useSearchComputersQuery, useGetComputerQuery } = computersApi
