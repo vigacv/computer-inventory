@@ -9,8 +9,14 @@ export function useComputerNavigation() {
   const navigate = useNavigate()
   const { search } = useLocation()
 
-  const openDetails = useCallback((id: number) => navigate({ pathname: `/computers/${id}`, search }), [navigate, search])
-  const closeDetails = useCallback(() => navigate({ pathname: '/', search }), [navigate, search])
+  /** `replace` swaps the current history entry, e.g. so Back doesn't return to a deleted computer. */
+  type Options = { replace?: boolean }
+
+  const openDetails = useCallback(
+    (id: number, options?: Options) => navigate({ pathname: `/computers/${id}`, search }, options),
+    [navigate, search],
+  )
+  const closeDetails = useCallback((options?: Options) => navigate({ pathname: '/', search }, options), [navigate, search])
 
   return { openDetails, closeDetails }
 }

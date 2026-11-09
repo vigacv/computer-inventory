@@ -115,19 +115,26 @@ function LoadingDetails() {
 export function ComputerDetailsDrawer() {
   const id = Number(useParams().id)
   const validId = Number.isInteger(id) && id > 0
-  const { closeDetails } = useComputerNavigation()
+  const { openDetails, closeDetails } = useComputerNavigation()
   const { data, isLoading, isError, error, refetch } = useGetComputerQuery(id, { skip: !validId })
   const [editing, setEditing] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
-  const [deleteComputer, { isLoading: deleting }] = useDeleteComputerMutation()
+  const [deleteComputer] = useDeleteComputerMutation()
   const { enqueueSnackbar } = useSnackbar()
 
   const handleDelete = async () => {
-    const result = await deleteComputer(id)
+    // Close the details before deleting. Deleting invalidates this computer's cached details:
+    // while the drawer still shows them, RTK Query would refetch them (a needless 404); once
+    // nothing shows them, it just drops them from the cache.
     setConfirmingDelete(false)
-    if ('error' in result) return // the error snackbar is shown by the API middleware
+    closeDetails({ replace: true }) // replace: Back shouldn't lead to the deleted computer
+
+    const result = await deleteComputer(id)
+    if ('error' in result) {
+      openDetails(id, { replace: true }) // bring the details back; the error snackbar comes from the API middleware
+      return
+    }
     enqueueSnackbar(`Computer #${id} deleted.`, { variant: 'success' })
-    closeDetails()
   }
 
   const notFound = !validId || (isError && 'status' in error && error.status === 404)
@@ -137,7 +144,7 @@ export function ComputerDetailsDrawer() {
     <Drawer
       anchor="right"
       open
-      onClose={closeDetails}
+      onClose={() => closeDetails()}
       slotProps={{ paper: { sx: { width: { xs: '100%', sm: DRAWER_WIDTH } }, 'aria-labelledby': titleId } }}
     >
       <Stack direction="row" sx={{ alignItems: 'flex-start', px: 3, pt: 2.5, pb: 2, gap: 1 }}>
@@ -161,7 +168,7 @@ export function ComputerDetailsDrawer() {
             </Button>
           </>
         )}
-        <IconButton aria-label="Close details" onClick={closeDetails} edge="end">
+        <IconButton aria-label="Close details" onClick={() => closeDetails()} edge="end">
           <CloseIcon />
         </IconButton>
       </Stack>
@@ -185,7 +192,6 @@ export function ComputerDetailsDrawer() {
           message="This permanently removes the computer and its specs. It can't be undone."
           confirmLabel="Delete"
           destructive
-          busy={deleting}
           onConfirm={handleDelete}
           onCancel={() => setConfirmingDelete(false)}
         />

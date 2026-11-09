@@ -9,17 +9,22 @@ import { server } from '../../test/server'
 
 let deleted: boolean
 let deleteCalls: number
+let detailRequestsAfterDelete: number
 
 function mockApi(deleteResponse?: () => Response) {
   deleted = false
   deleteCalls = 0
+  detailRequestsAfterDelete = 0
   server.use(
     http.get('*/api/computers', () =>
       HttpResponse.json(pageOf(deleted ? [computerFixture()] : [computerFixture(), detailsFixture()])),
     ),
-    http.get('*/api/computers/5', () =>
-      deleted ? HttpResponse.json({ title: 'Computer not found' }, { status: 404 }) : HttpResponse.json(detailsFixture()),
-    ),
+    http.get('*/api/computers/5', () => {
+      if (deleteCalls > 0) detailRequestsAfterDelete++
+      return deleted
+        ? HttpResponse.json({ title: 'Computer not found' }, { status: 404 })
+        : HttpResponse.json(detailsFixture())
+    }),
     http.delete('*/api/computers/5', () => {
       deleteCalls++
       if (deleteResponse) return deleteResponse()
@@ -68,9 +73,10 @@ describe('Delete computer', () => {
     expect(screen.getByTestId('location').textContent).toBe('?search=amd')
     await waitFor(() => expect(screen.queryByText('AMD FX-8370')).not.toBeInTheDocument())
     expect(deleteCalls).toBe(1)
+    expect(detailRequestsAfterDelete).toBe(0) // no refetch of the deleted computer (it would 404)
   })
 
-  it('reports a failed delete and keeps the details open', async () => {
+  it('reports a failed delete and brings the details back', async () => {
     mockApi(() => HttpResponse.json({ title: 'Server error', detail: 'Database unavailable' }, { status: 500 }))
     const confirm = await askToDelete()
 
