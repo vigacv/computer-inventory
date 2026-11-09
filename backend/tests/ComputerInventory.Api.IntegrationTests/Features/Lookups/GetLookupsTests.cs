@@ -2,7 +2,7 @@ using System.Net.Http.Json;
 using ComputerInventory.Api.Entities;
 using ComputerInventory.Api.Features.Lookups;
 
-namespace ComputerInventory.Api.Tests.Features.Lookups;
+namespace ComputerInventory.Api.IntegrationTests.Features.Lookups;
 
 [Collection(ApiTestGroup.Name)]
 public sealed class GetLookupsTests(ApiFactory factory)

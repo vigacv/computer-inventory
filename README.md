@@ -31,9 +31,21 @@ dotnet run --project backend/src/ComputerInventory.Api   # http://localhost:5080
 cd frontend && npm install && npm run dev                # http://localhost:5173
 ```
 
+## Configuration
+
+| Setting | Where | Default |
+|---|---|---|
+| `VITE_API_BASE_URL` | frontend build-time env var | `/api` (same origin, via the Vite dev proxy / nginx). Can be absolute. |
+| `API_URL` | Vite dev proxy target | `http://localhost:5080` |
+| `RateLimiting:PermitLimit` / `WindowSeconds` | API `appsettings.json` | 300 requests per 60 s per client IP |
+
 ## Tests
 
 ```bash
-dotnet test backend/
+dotnet test backend/tests/ComputerInventory.Api.UnitTests          # fast, no dependencies
+dotnet test backend/tests/ComputerInventory.Api.IntegrationTests   # real SQL Server via Testcontainers (needs Docker)
 cd frontend && npm test
 ```
+
+Pure logic (validators, helpers) is unit-tested; anything whose correctness depends on SQL Server
+(queries, constraints, migrations) is integration-tested against a real SQL Server container.

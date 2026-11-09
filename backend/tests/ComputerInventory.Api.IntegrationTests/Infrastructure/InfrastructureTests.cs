@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Json;
 
-namespace ComputerInventory.Api.Tests.Infrastructure;
+namespace ComputerInventory.Api.IntegrationTests.Infrastructure;
 
 [Collection(ApiTestGroup.Name)]
 public sealed class InfrastructureTests(ApiFactory factory)

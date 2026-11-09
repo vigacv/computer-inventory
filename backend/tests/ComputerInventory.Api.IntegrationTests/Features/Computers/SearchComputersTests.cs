@@ -5,7 +5,7 @@ using ComputerInventory.Api.Entities;
 using ComputerInventory.Api.Features.Computers;
 using Microsoft.AspNetCore.Http;
 
-namespace ComputerInventory.Api.Tests.Features.Computers;
+namespace ComputerInventory.Api.IntegrationTests.Features.Computers;
 
 [Collection(ApiTestGroup.Name)]
 public sealed class SearchComputersTests(ApiFactory factory)
@@ -90,17 +90,15 @@ public sealed class SearchComputersTests(ApiFactory factory)
         Assert.Equal([1, 2, 4], at500);
     }
 
-    [Theory]
-    [InlineData("?page=0", "Page")]
-    [InlineData("?pageSize=101", "PageSize")]
-    [InlineData("?sortBy=price", "SortBy")]
-    [InlineData("?sortDir=up", "SortDir")]
-    public async Task Rejects_invalid_parameters(string query, string invalidField)
+    // Validation rules are unit-tested; this proves the validator is wired into the endpoint.
+    [Fact]
+    public async Task Invalid_parameters_return_validation_problem()
     {
-        var response = await _client.GetAsync(new Uri($"/api/computers{query}", UriKind.Relative));
+        var response = await _client.GetAsync(new Uri("/api/computers?page=0&sortBy=price", UriKind.Relative));
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var problem = await response.Content.ReadFromJsonAsync<HttpValidationProblemDetails>(TestJson.Options);
-        Assert.Contains(invalidField, problem!.Errors.Keys);
+        Assert.Contains("Page", problem!.Errors.Keys);
+        Assert.Contains("SortBy", problem.Errors.Keys);
     }
 }

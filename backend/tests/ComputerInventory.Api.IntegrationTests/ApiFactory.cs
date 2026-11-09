@@ -5,7 +5,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.MsSql;
 
-namespace ComputerInventory.Api.Tests;
+namespace ComputerInventory.Api.IntegrationTests;
 
 /// <summary>
 /// Boots the real API against a throwaway SQL Server container. Startup applies migrations

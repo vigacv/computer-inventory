@@ -3,6 +3,7 @@
     <Project Path="src/ComputerInventory.Api/ComputerInventory.Api.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/ComputerInventory.Api.Tests/ComputerInventory.Api.Tests.csproj" />
+    <Project Path="tests/ComputerInventory.Api.IntegrationTests/ComputerInventory.Api.IntegrationTests.csproj" />
+    <Project Path="tests/ComputerInventory.Api.UnitTests/ComputerInventory.Api.UnitTests.csproj" />
   </Folder>
 </Solution>

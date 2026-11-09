@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace ComputerInventory.Api.Tests;
+namespace ComputerInventory.Api.IntegrationTests;
 
 internal static class TestJson
 {
