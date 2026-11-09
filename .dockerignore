@@ -1,0 +1,15 @@
+# Allowlist: send the Docker build only what the images need.
+*
+!.editorconfig
+!backend/Directory.Build.props
+!backend/Dockerfile
+!backend/src/
+!frontend/
+
+# ...minus local build output and machine-specific files.
+**/bin/
+**/obj/
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
