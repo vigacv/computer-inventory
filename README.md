@@ -26,7 +26,8 @@ frontend/   React SPA
 ```bash
 docker compose up -d db         # SQL Server Express (dev password defaults in docker-compose.yml)
 
-dotnet run --project backend/src/ComputerInventory.Api   # http://localhost:5080 (API docs at /scalar)
+dotnet tool restore --tool-manifest backend/dotnet-tools.json   # dotnet-ef, for creating migrations
+dotnet run --project backend/src/ComputerInventory.Api   # http://localhost:5080 (API docs at /scalar); applies migrations + seed on startup
 cd frontend && npm install && npm run dev                # http://localhost:5173
 ```
 
