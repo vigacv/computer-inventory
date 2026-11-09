@@ -1,8 +1,10 @@
+using System.Text.Json;
 using ComputerInventory.Api.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Testcontainers.MsSql;
 
 namespace ComputerInventory.Api.IntegrationTests;
@@ -25,6 +27,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseEnvironment("Testing");
         builder.UseSetting("ConnectionStrings:Default", ConnectionString);
     }
+
+    /// <summary>The API's own JSON settings, so tests read responses exactly like the API writes them.</summary>
+    public JsonSerializerOptions JsonOptions =>
+        Services.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>().Value.SerializerOptions;
 
     public AppDbContext CreateDbContext() =>
         Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>();

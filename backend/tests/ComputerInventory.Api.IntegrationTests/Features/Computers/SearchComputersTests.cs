@@ -13,7 +13,7 @@ public sealed class SearchComputersTests(ApiFactory factory)
     private readonly HttpClient _client = factory.CreateClient();
 
     private Task<PagedResult<ComputerSummary>?> Search(string query = "") =>
-        _client.GetFromJsonAsync<PagedResult<ComputerSummary>>($"/api/computers{query}", TestJson.Options);
+        _client.GetFromJsonAsync<PagedResult<ComputerSummary>>($"/api/computers{query}", factory.JsonOptions);
 
     [Fact]
     public async Task Returns_first_page_with_defaults()
@@ -97,7 +97,7 @@ public sealed class SearchComputersTests(ApiFactory factory)
         var response = await _client.GetAsync(new Uri("/api/computers?page=0&sortBy=price", UriKind.Relative));
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        var problem = await response.Content.ReadFromJsonAsync<HttpValidationProblemDetails>(TestJson.Options);
+        var problem = await response.Content.ReadFromJsonAsync<HttpValidationProblemDetails>(factory.JsonOptions);
         Assert.Contains("Page", problem!.Errors.Keys);
         Assert.Contains("SortBy", problem.Errors.Keys);
     }

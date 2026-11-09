@@ -11,7 +11,7 @@ public sealed class GetLookupsTests(ApiFactory factory)
     public async Task Returns_manufacturers_sorted_and_enum_values()
     {
         var lookups = await factory.CreateClient()
-            .GetFromJsonAsync<GetLookups.Response>("/api/lookups", TestJson.Options);
+            .GetFromJsonAsync<GetLookups.Response>("/api/lookups", factory.JsonOptions);
 
         Assert.NotNull(lookups);
         Assert.Equal(["AMD", "Intel", "NVIDIA"], lookups.Manufacturers.Select(m => m.Name));

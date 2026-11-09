@@ -38,7 +38,7 @@ public sealed class InfrastructureTests(ApiFactory factory)
         var response = await client.GetAsync(uri);
 
         Assert.Equal(HttpStatusCode.TooManyRequests, response.StatusCode);
-        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(TestJson.Options);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(factory.JsonOptions);
         Assert.Equal(429, problem?.Status);
     }
 }
