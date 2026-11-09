@@ -34,7 +34,6 @@ import { storageTypeLabels, usbPortTypeLabels } from '../labels'
 import type { ComponentInfo } from '../types'
 import {
   computerFormSchema,
-  convertUnit,
   ramUnits,
   storageUnits,
   toFormErrors,
@@ -98,18 +97,16 @@ function NumberField({
 }
 
 /**
- * Unit picker that converts the amount when the unit changes (16 GB → 16384 MB),
- * so switching units never changes what the user meant.
+ * Unit picker for an amount. Changing the unit changes what the typed number means
+ * (type "1", pick TB → 1 TB); it doesn't convert the number.
  */
 function UnitSelect<U extends string>({
   form,
-  valueName,
   unitName,
   units,
   label,
 }: {
   form: Form
-  valueName: FieldPath<ComputerFormValues>
   unitName: FieldPath<ComputerFormValues>
   units: Record<U, number>
   label: string
@@ -125,13 +122,9 @@ function UnitSelect<U extends string>({
           label={label}
           value={field.value}
           onChange={(e) => {
-            const from = units[field.value as U]
-            const to = units[e.target.value as U]
-            const amount = form.getValues(valueName) as number
-            if (Number.isFinite(amount)) {
-              form.setValue(valueName, convertUnit(amount, from, to), { shouldDirty: true, shouldValidate: true })
-            }
             field.onChange(e.target.value)
+            // Re-check the amount: the limits depend on the unit.
+            void form.trigger(unitName.replace('.unit', '.value') as FieldPath<ComputerFormValues>)
           }}
           fullWidth
         >
@@ -315,13 +308,13 @@ export function ComputerFormDialog({ title, submitLabel, defaultValues, onSubmit
             <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, alignItems: 'start' }}>
               <AmountWithUnit>
                 <NumberField form={form} name="ram.value" label="RAM" />
-                <UnitSelect form={form} valueName="ram.value" unitName="ram.unit" units={ramUnits} label="Unit" />
+                <UnitSelect form={form} unitName="ram.unit" units={ramUnits} label="Unit" />
               </AmountWithUnit>
               <NumberField form={form} name="psuWatts" label="Power supply" step="1" endAdornment="W" />
 
               <AmountWithUnit>
                 <NumberField form={form} name="storage.value" label="Storage" />
-                <UnitSelect form={form} valueName="storage.value" unitName="storage.unit" units={storageUnits} label="Unit" />
+                <UnitSelect form={form} unitName="storage.unit" units={storageUnits} label="Unit" />
               </AmountWithUnit>
               <Controller
                 control={form.control}
@@ -347,7 +340,7 @@ export function ComputerFormDialog({ title, submitLabel, defaultValues, onSubmit
 
               <AmountWithUnit>
                 <NumberField form={form} name="weight.value" label="Weight" />
-                <UnitSelect form={form} valueName="weight.value" unitName="weight.unit" units={weightUnits} label="Unit" />
+                <UnitSelect form={form} unitName="weight.unit" units={weightUnits} label="Unit" />
               </AmountWithUnit>
             </Box>
 

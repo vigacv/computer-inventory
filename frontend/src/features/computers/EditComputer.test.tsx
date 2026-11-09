@@ -89,14 +89,16 @@ describe('Edit computer', () => {
     expect(drawer.getByText('750 GB HDD')).toBeInTheDocument()
   })
 
-  it('converts the amount when the unit changes', async () => {
+  it('reads the number in the chosen unit', async () => {
     mockApi()
     const form = await openEditor()
 
     await userEvent.click(form.getAllByRole('combobox', { name: 'Unit' })[0])
     await userEvent.click(within(await screen.findByRole('listbox')).getByRole('option', { name: 'MB' }))
+    await userEvent.click(form.getByRole('button', { name: 'Save changes' }))
 
-    expect(form.getByRole('spinbutton', { name: 'RAM' })).toHaveValue(32768)
+    expect(form.getByRole('spinbutton', { name: 'RAM' })).toHaveValue(32) // number unchanged...
+    await waitFor(() => expect(putBodies[0]).toMatchObject({ ramMb: 32 })) // ...now meaning 32 MB
   })
 
   it('checks the form before sending anything', async () => {

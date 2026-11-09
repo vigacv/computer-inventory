@@ -1,4 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import {
   Alert,
@@ -13,14 +14,16 @@ import {
   Typography,
 } from '@mui/material'
 import { useState, type ReactNode } from 'react'
+import { useSnackbar } from 'notistack'
 import { useParams } from 'react-router'
 import { getErrorMessage } from '../../api/errors'
 import { useAppSelector } from '../../app/hooks'
+import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { ErrorState } from '../../components/ErrorState'
 import { formatDateTime, formatRam, formatWatts, formatWeight } from '../../utils/format'
 import { selectWeightUnit } from '../preferences/preferencesSlice'
 import { WeightUnitToggle } from '../preferences/WeightUnitToggle'
-import { useGetComputerQuery } from './computersApi'
+import { useDeleteComputerMutation, useGetComputerQuery } from './computersApi'
 import { EditComputerDialog } from './EditComputerDialog'
 import { formatStorage, usbPortTypeLabels } from './labels'
 import type { ComputerDetails } from './types'
@@ -115,6 +118,17 @@ export function ComputerDetailsDrawer() {
   const { closeDetails } = useComputerNavigation()
   const { data, isLoading, isError, error, refetch } = useGetComputerQuery(id, { skip: !validId })
   const [editing, setEditing] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [deleteComputer, { isLoading: deleting }] = useDeleteComputerMutation()
+  const { enqueueSnackbar } = useSnackbar()
+
+  const handleDelete = async () => {
+    const result = await deleteComputer(id)
+    setConfirmingDelete(false)
+    if ('error' in result) return // the error snackbar is shown by the API middleware
+    enqueueSnackbar(`Computer #${id} deleted.`, { variant: 'success' })
+    closeDetails()
+  }
 
   const notFound = !validId || (isError && 'status' in error && error.status === 404)
   const titleId = 'computer-details-title'
@@ -138,9 +152,14 @@ export function ComputerDetailsDrawer() {
           )}
         </Box>
         {data && (
-          <Button startIcon={<EditOutlinedIcon />} onClick={() => setEditing(true)}>
-            Edit
-          </Button>
+          <>
+            <Button startIcon={<EditOutlinedIcon />} onClick={() => setEditing(true)}>
+              Edit
+            </Button>
+            <Button color="error" startIcon={<DeleteOutlinedIcon />} onClick={() => setConfirmingDelete(true)}>
+              Delete
+            </Button>
+          </>
         )}
         <IconButton aria-label="Close details" onClick={closeDetails} edge="end">
           <CloseIcon />
@@ -159,6 +178,18 @@ export function ComputerDetailsDrawer() {
           <Details computer={data} />
         )}
       </Box>
+
+      {confirmingDelete && (
+        <ConfirmDialog
+          title={`Delete computer #${id}?`}
+          message="This permanently removes the computer and its specs. It can't be undone."
+          confirmLabel="Delete"
+          destructive
+          busy={deleting}
+          onConfirm={handleDelete}
+          onCancel={() => setConfirmingDelete(false)}
+        />
+      )}
 
       {editing && data && (
         <EditComputerDialog computer={data} onClose={() => setEditing(false)} onReload={refetch} />
