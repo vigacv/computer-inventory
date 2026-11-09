@@ -6,7 +6,8 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
  */
 export const baseApi = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
+  // Absolute URL so requests also work outside the browser (tests run on Node).
+  baseQuery: fetchBaseQuery({ baseUrl: `${window.location.origin}/api` }),
   tagTypes: ['Computer', 'Processor', 'GraphicsCard', 'Lookups'],
   endpoints: () => ({}),
 })

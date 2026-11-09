@@ -1,12 +1,17 @@
+using System.Text.Json.Serialization;
 using ComputerInventory.Api.Common;
 using ComputerInventory.Api.Data;
+using FluentValidation;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
+builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddValidatorsFromAssemblyContaining<Program>(includeInternalTypes: true);
+builder.Services.AddApiRateLimiting(builder.Configuration);
 builder.Services.AddEndpoints(typeof(Program).Assembly);
 builder.Services.AddDatabase(builder.Configuration);
 
@@ -19,6 +24,7 @@ if (!app.Environment.IsProduction())
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseRateLimiter();
 
 if (app.Environment.IsDevelopment())
 {

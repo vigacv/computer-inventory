@@ -25,3 +25,7 @@ trim_trailing_whitespace = false
 [**/Migrations/*.cs]
 generated_code = true
 dotnet_analyzer_diagnostic.severity = none
+
+# Test names use underscores for readability (Method_scenario_expected)
+[**/tests/**/*.cs]
+dotnet_diagnostic.CA1707.severity = none

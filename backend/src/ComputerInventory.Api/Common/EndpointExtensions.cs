@@ -19,7 +19,7 @@ public static class EndpointExtensions
 
     public static IEndpointRouteBuilder MapEndpoints(this IEndpointRouteBuilder app)
     {
-        var api = app.MapGroup("/api");
+        var api = app.MapGroup("/api").RequireRateLimiting(RateLimitingOptions.ApiPolicy);
 
         foreach (var endpoint in app.ServiceProvider.GetServices<IEndpoint>())
         {
