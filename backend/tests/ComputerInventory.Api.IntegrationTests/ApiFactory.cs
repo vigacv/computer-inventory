@@ -27,6 +27,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         builder.UseEnvironment("Testing");
         builder.UseSetting("ConnectionStrings:Default", ConnectionString);
+        // The whole suite shares one client "IP": keep the limiter out of the way, except in the
+        // test that checks it (which sets its own low limit).
+        builder.UseSetting("RateLimiting:PermitLimit", "1000000");
     }
 
     /// <summary>The API's own JSON settings, so tests read responses exactly like the API writes them.</summary>
