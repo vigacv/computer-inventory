@@ -1,10 +1,15 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
+const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL
+if (!configuredBaseUrl) {
+  throw new Error('VITE_API_BASE_URL is not set. See frontend/.env.')
+}
+
 /**
- * Resolved to an absolute URL so it works with both relative and absolute settings,
- * and outside the browser (tests run on Node, where relative URLs can't be fetched).
+ * Absolute URL of the API. A relative value (e.g. "/api") is resolved against the page's origin,
+ * which also makes it usable from tests running on Node, where relative URLs can't be fetched.
  */
-export const apiBaseUrl = new URL(import.meta.env.VITE_API_BASE_URL ?? '/api', window.location.origin).href
+export const apiBaseUrl = new URL(configuredBaseUrl, window.location.origin).href
 
 /**
  * Single RTK Query API slice. Feature folders extend it with

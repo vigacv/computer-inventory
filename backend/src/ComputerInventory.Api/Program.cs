@@ -11,6 +11,7 @@ builder.Services.AddProblemDetails();
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddValidatorsFromAssemblyContaining<Program>(includeInternalTypes: true);
+builder.Services.AddApiCors(builder.Configuration);
 builder.Services.AddApiRateLimiting(builder.Configuration);
 builder.Services.AddEndpoints(typeof(Program).Assembly);
 builder.Services.AddDatabase(builder.Configuration);
@@ -24,6 +25,7 @@ if (!app.Environment.IsProduction())
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseCors();
 app.UseRateLimiter();
 
 if (app.Environment.IsDevelopment())

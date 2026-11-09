@@ -5,9 +5,10 @@
 !.vscode/extensions.json
 *.swp
 
-# Environment
+# Environment (frontend/.env holds non-secret defaults and is committed; *.local overrides are not)
 .env
 .env.*
+!frontend/.env
 
 # .NET
 bin/

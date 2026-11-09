@@ -22,10 +22,9 @@ export default defineConfig({
     },
   },
   server: {
+    // Fixed port: the API's CORS policy allows this exact origin.
     port: 5173,
-    proxy: {
-      '/api': { target: process.env.API_URL ?? 'http://localhost:5080', changeOrigin: true },
-    },
+    strictPort: true,
   },
   test: {
     environment: 'jsdom',

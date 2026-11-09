@@ -28,15 +28,15 @@ docker compose up -d db         # SQL Server Express (dev password defaults in d
 
 dotnet tool restore --tool-manifest backend/dotnet-tools.json   # dotnet-ef, for creating migrations
 dotnet run --project backend/src/ComputerInventory.Api   # http://localhost:5080 (API docs at /scalar); applies migrations + seed on startup
-cd frontend && npm install && npm run dev                # http://localhost:5173
+cd frontend && npm install && npm run dev                # http://localhost:5173 (calls the API directly; CORS allows this origin)
 ```
 
 ## Configuration
 
 | Setting | Where | Default |
 |---|---|---|
-| `VITE_API_BASE_URL` | frontend build-time env var | `/api` (same origin, via the Vite dev proxy / nginx). Can be absolute. |
-| `API_URL` | Vite dev proxy target | `http://localhost:5080` |
+| `VITE_API_BASE_URL` | `frontend/.env` (override in `.env.local` or env var) | `http://localhost:5080/api` |
+| `Cors:AllowedOrigins` | API `appsettings.*.json` | `http://localhost:5173` in Development; none otherwise (cross-origin calls blocked) |
 | `RateLimiting:PermitLimit` / `WindowSeconds` | API `appsettings.json` | 300 requests per 60 s per client IP |
 
 ## Tests
