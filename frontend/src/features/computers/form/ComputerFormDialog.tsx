@@ -3,7 +3,6 @@ import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 import {
   Alert,
-  Autocomplete,
   Box,
   Button,
   Dialog,
@@ -29,9 +28,8 @@ import {
   type FieldPath,
   type UseFormReturn,
 } from 'react-hook-form'
-import { useListGraphicsCardsQuery, useListProcessorsQuery } from '../../components/componentsApi'
+import { ComponentPicker } from '../../components/ComponentPicker'
 import { storageTypeLabels, usbPortTypeLabels } from '../labels'
-import type { ComponentInfo } from '../types'
 import {
   computerFormSchema,
   ramUnits,
@@ -144,43 +142,20 @@ function AmountWithUnit({ children }: { children: ReactNode }) {
   return <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 96px', gap: 1, alignItems: 'start' }}>{children}</Box>
 }
 
-function ComponentPicker({
-  form,
-  name,
-  label,
-  options,
-  loading,
-}: {
-  form: Form
-  name: 'processorId' | 'graphicsCardId'
-  label: string
-  options: ComponentInfo[]
-  loading: boolean
-}) {
+/** The processor or graphics card field, wired to the form. */
+function ComponentField({ form, name }: { form: Form; name: 'processorId' | 'graphicsCardId' }) {
   return (
     <Controller
       control={form.control}
       name={name}
       render={({ field, fieldState }) => (
-        <Autocomplete
-          options={options}
-          loading={loading}
-          groupBy={(o) => o.manufacturer}
-          getOptionLabel={(o) => o.model}
-          isOptionEqualToValue={(a, b) => a.id === b.id}
-          value={options.find((o) => o.id === field.value) ?? null}
-          onChange={(_, option) => field.onChange(option?.id)}
+        <ComponentPicker
+          kind={name === 'processorId' ? 'processor' : 'graphicsCard'}
+          value={field.value}
+          onChange={(id) => field.onChange(id)}
           onBlur={field.onBlur}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              inputRef={field.ref}
-              label={label}
-              size="small"
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-            />
-          )}
+          inputRef={field.ref}
+          error={fieldState.error?.message}
         />
       )}
     />
@@ -259,8 +234,6 @@ function UsbPortsField({ form }: { form: Form }) {
 export function ComputerFormDialog({ title, submitLabel, defaultValues, onSubmit, onClose, notice }: ComputerFormDialogProps) {
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'))
-  const processors = useListProcessorsQuery()
-  const graphicsCards = useListGraphicsCardsQuery()
 
   const form = useForm<ComputerFormValues>({ resolver: zodResolver(computerFormSchema), defaultValues, mode: 'onTouched' })
   const { isSubmitting, errors } = form.formState
@@ -289,20 +262,8 @@ export function ComputerFormDialog({ title, submitLabel, defaultValues, onSubmit
             {notice}
             {errors.root?.server && <Alert severity="error">{errors.root.server.message}</Alert>}
 
-            <ComponentPicker
-              form={form}
-              name="processorId"
-              label="Processor"
-              options={processors.data ?? []}
-              loading={processors.isLoading}
-            />
-            <ComponentPicker
-              form={form}
-              name="graphicsCardId"
-              label="Graphics card"
-              options={graphicsCards.data ?? []}
-              loading={graphicsCards.isLoading}
-            />
+            <ComponentField form={form} name="processorId" />
+            <ComponentField form={form} name="graphicsCardId" />
 
             {/* Two equal columns; each amount sits next to its unit with a fixed-width unit picker. */}
             <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, alignItems: 'start' }}>

@@ -7,6 +7,12 @@ export interface ComponentInfo {
   model: string
 }
 
+/** A processor or graphics card to add; an unknown manufacturer name creates the manufacturer. */
+export interface NewComponent {
+  manufacturer: string
+  model: string
+}
+
 export interface UsbPortInfo {
   type: UsbPortType
   count: number
