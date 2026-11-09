@@ -133,7 +133,7 @@ function UnitSelect<U extends string>({
             }
             field.onChange(e.target.value)
           }}
-          sx={{ minWidth: 88 }}
+          fullWidth
         >
           {Object.keys(units).map((u) => (
             <MenuItem key={u} value={u}>
@@ -144,6 +144,11 @@ function UnitSelect<U extends string>({
       )}
     />
   )
+}
+
+/** An amount input with its unit picker beside it: the amount takes the space, the unit a fixed width. */
+function AmountWithUnit({ children }: { children: ReactNode }) {
+  return <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 96px', gap: 1, alignItems: 'start' }}>{children}</Box>
 }
 
 function ComponentPicker({
@@ -306,25 +311,25 @@ export function ComputerFormDialog({ title, submitLabel, defaultValues, onSubmit
               loading={graphicsCards.isLoading}
             />
 
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <Stack direction="row" spacing={1} sx={{ flex: 1 }}>
+            {/* Two equal columns; each amount sits next to its unit with a fixed-width unit picker. */}
+            <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, alignItems: 'start' }}>
+              <AmountWithUnit>
                 <NumberField form={form} name="ram.value" label="RAM" />
                 <UnitSelect form={form} valueName="ram.value" unitName="ram.unit" units={ramUnits} label="Unit" />
-              </Stack>
+              </AmountWithUnit>
               <NumberField form={form} name="psuWatts" label="Power supply" step="1" endAdornment="W" />
-            </Stack>
 
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: { sm: 'flex-start' } }}>
-              <Stack direction="row" spacing={1} sx={{ flex: 1 }}>
+              <AmountWithUnit>
                 <NumberField form={form} name="storage.value" label="Storage" />
                 <UnitSelect form={form} valueName="storage.value" unitName="storage.unit" units={storageUnits} label="Unit" />
-              </Stack>
+              </AmountWithUnit>
               <Controller
                 control={form.control}
                 name="storage.type"
                 render={({ field }) => (
                   <ToggleButtonGroup
                     exclusive
+                    fullWidth
                     size="small"
                     aria-label="Storage type"
                     value={field.value}
@@ -332,19 +337,19 @@ export function ComputerFormDialog({ title, submitLabel, defaultValues, onSubmit
                     sx={{ height: 40 }}
                   >
                     {Object.entries(storageTypeLabels).map(([value, label]) => (
-                      <ToggleButton key={value} value={value} sx={{ px: 2 }}>
+                      <ToggleButton key={value} value={value}>
                         {label}
                       </ToggleButton>
                     ))}
                   </ToggleButtonGroup>
                 )}
               />
-            </Stack>
 
-            <Stack direction="row" spacing={1} sx={{ maxWidth: { sm: '50%' } }}>
-              <NumberField form={form} name="weight.value" label="Weight" />
-              <UnitSelect form={form} valueName="weight.value" unitName="weight.unit" units={weightUnits} label="Unit" />
-            </Stack>
+              <AmountWithUnit>
+                <NumberField form={form} name="weight.value" label="Weight" />
+                <UnitSelect form={form} valueName="weight.value" unitName="weight.unit" units={weightUnits} label="Unit" />
+              </AmountWithUnit>
+            </Box>
 
             <UsbPortsField form={form} />
           </Stack>
