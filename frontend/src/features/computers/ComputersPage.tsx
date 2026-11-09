@@ -5,6 +5,7 @@ import { Outlet } from 'react-router'
 import { getErrorMessage } from '../../api/errors'
 import { useAppSelector } from '../../app/hooks'
 import { ErrorState } from '../../components/ErrorState'
+import { CompareBar } from '../compare/CompareBar'
 import { WeightUnitToggle } from '../preferences/WeightUnitToggle'
 import { AddComputerDialog } from './AddComputerDialog'
 import { ComputerFilters } from './ComputerFilters'
@@ -44,6 +45,8 @@ export function ComputersPage() {
       </Stack>
 
       <ComputerFilters />
+
+      <CompareBar />
 
       {isError && <ErrorState message={getErrorMessage(error)} onRetry={refetch} />}
 

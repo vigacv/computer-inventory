@@ -88,3 +88,11 @@ export interface SearchComputersArgs extends ComputerFilters {
   sortBy?: ComputerSortField
   sortDir?: SortDirection
 }
+
+/** Mirrors the API's CompareComputers.Response. */
+export interface CompareResult {
+  /** In the requested order. */
+  computers: ComputerDetails[]
+  /** Requested ids that don't exist (e.g. deleted since the link was shared). */
+  notFound: number[]
+}

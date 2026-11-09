@@ -32,6 +32,9 @@ add `-v` to also delete the data.
   RAM and storage ranges, storage type, CPU/GPU manufacturer, USB port type and minimum PSU.
   Search, filters, sort and page live in the URL, so any view can be bookmarked or shared.
 - **Details** in a side panel at `/computers/:id`: deep-linkable, and closing it returns to the same list.
+- **Compare** 2–4 computers side by side: tick them in the list (the selection survives paging and filtering)
+  and open `/compare?ids=…`, which is shareable. The best value of each spec is highlighted (more RAM, storage,
+  power and ports; less weight; SSD over HDD), and a switch hides the specs that are the same for all.
 - **Add, edit and delete** computers. Amounts are entered in friendly units (16 GB, 2 TB, 8.1 kg or 17.9 lb);
   errors are shown before submitting and, from the API, under the matching field.
 - **Concurrent edits are detected**: saving over someone else's newer changes is refused, with an option
@@ -80,7 +83,8 @@ validator, endpoint and handler, so a change to a feature usually touches one pl
 ```
 backend/src/ComputerInventory.Api/
 ├── Features/
-│   ├── Computers/      SearchComputers, GetComputer, CreateComputer, UpdateComputer, DeleteComputer
+│   ├── Computers/      SearchComputers, GetComputer, CompareComputers, CreateComputer, UpdateComputer,
+│   │                   DeleteComputer
 │   │                   (+ ComputerSpec: rules shared by create and update)
 │   ├── Processors/     ListProcessors, CreateProcessor
 │   ├── GraphicsCards/  ListGraphicsCards, CreateGraphicsCard
@@ -119,6 +123,7 @@ frontend/src/
 ├── app/            store and typed hooks
 ├── features/
 │   ├── computers/  list page, grid, filters, details drawer, add/edit dialogs, form logic
+│   ├── compare/    selection bar, comparison page, best-value rules
 │   ├── components/ processor / graphics card picker and "add new" dialog
 │   ├── lookups/    reference data for filters
 │   └── preferences/ kg / lb preference
@@ -127,9 +132,10 @@ frontend/src/
 ```
 
 **State:** server data is handled by **RTK Query** (caching, refetching after changes, cache updates from
-save responses). Redux itself holds just two small slices: the list's search/filter/sort/page state, shared by
-the filter bar, the grid and the URL, and the kg/lb preference, shared by the grid and the details panel and
-saved to `localStorage` by a listener middleware. Everything else is local component state.
+save responses). Redux itself holds three small slices, each shared by several components: the list's
+search/filter/sort/page state (filter bar, grid, URL), the computers picked for comparison (grid checkboxes,
+selection bar, comparison page), and the kg/lb preference (grid, details, comparison), saved to `localStorage`
+by a listener middleware. Everything else is local component state.
 
 ## Data model
 
@@ -204,6 +210,7 @@ clear messages; the database is the backstop.
 |---|---|---|
 | GET | `/api/computers` | `search`, `minRamMb`/`maxRamMb`, `minStorageGb`/`maxStorageGb`, `storageType`, `processorManufacturerId`, `graphicsCardManufacturerId`, `usbPortType`, `minPsuWatts`, `sortBy`, `sortDir`, `page`, `pageSize` |
 | GET | `/api/computers/{id}` | Includes `rowVersion` for updates |
+| GET | `/api/computers/compare?ids=1&ids=5` | 2–4 computers' details in the requested order, plus ids that don't exist |
 | POST | `/api/computers` | 201 with `Location` |
 | PUT | `/api/computers/{id}` | Send the loaded `rowVersion`; 409 if it changed since |
 | DELETE | `/api/computers/{id}` | 204, or 404 |

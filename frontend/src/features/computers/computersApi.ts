@@ -1,6 +1,13 @@
 import { baseApi } from '../../api/baseApi'
 import type { PagedResult } from '../../api/types'
-import type { ComputerDetails, ComputerSpec, ComputerSummary, SearchComputersArgs, UpdateComputerArgs } from './types'
+import type {
+  CompareResult,
+  ComputerDetails,
+  ComputerSpec,
+  ComputerSummary,
+  SearchComputersArgs,
+  UpdateComputerArgs,
+} from './types'
 
 export const computersApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -14,6 +21,12 @@ export const computersApi = baseApi.injectEndpoints({
     getComputer: build.query<ComputerDetails, number>({
       query: (id) => `/computers/${id}`,
       providesTags: (_result, _error, id) => [{ type: 'Computer', id }],
+    }),
+    compareComputers: build.query<CompareResult, number[]>({
+      // Repeated parameter (?ids=1&ids=5), which the API binds to an array.
+      query: (ids) => `/computers/compare?${ids.map((id) => `ids=${id}`).join('&')}`,
+      // Refetched when any compared computer changes, or when lists are invalidated (adds/deletes).
+      providesTags: (_result, _error, ids) => [{ type: 'Computer', id: 'LIST' }, ...ids.map((id) => ({ type: 'Computer' as const, id }))],
     }),
     updateComputer: build.mutation<ComputerDetails, UpdateComputerArgs>({
       query: ({ id, spec, rowVersion }) => ({ url: `/computers/${id}`, method: 'PUT', body: { ...spec, rowVersion } }),
@@ -46,6 +59,7 @@ export const computersApi = baseApi.injectEndpoints({
 
 export const {
   useSearchComputersQuery,
+  useCompareComputersQuery,
   useGetComputerQuery,
   useUpdateComputerMutation,
   useCreateComputerMutation,

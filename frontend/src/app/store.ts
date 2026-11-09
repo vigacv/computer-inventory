@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { baseApi } from '../api/baseApi'
 import { errorNotifier } from '../api/errorNotifier'
+import { compareSelectionSlice } from '../features/compare/compareSelectionSlice'
 import { computersQuerySlice } from '../features/computers/computersQuerySlice'
 import { preferencesPersistence, preferencesSlice } from '../features/preferences/preferencesSlice'
 
@@ -9,6 +10,7 @@ const rootReducer = combineReducers({
   [baseApi.reducerPath]: baseApi.reducer,
   [computersQuerySlice.reducerPath]: computersQuerySlice.reducer,
   [preferencesSlice.reducerPath]: preferencesSlice.reducer,
+  [compareSelectionSlice.reducerPath]: compareSelectionSlice.reducer,
 })
 
 export type RootState = ReturnType<typeof rootReducer>

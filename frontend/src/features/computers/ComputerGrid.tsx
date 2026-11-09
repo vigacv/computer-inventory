@@ -4,11 +4,13 @@ import {
   GridActionsCellItem,
   type GridColDef,
   type GridPaginationModel,
+  type GridRowSelectionModel,
   type GridSortModel,
 } from '@mui/x-data-grid'
 import { useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import { formatRam, formatWatts, formatWeight, type WeightUnit } from '../../utils/format'
+import { MAX_COMPARED, selectComparedIds, selectionReplaced } from '../compare/compareSelectionSlice'
 import { selectWeightUnit } from '../preferences/preferencesSlice'
 import { pageChanged, selectComputersQuery, sortChanged } from './computersQuerySlice'
 import { formatComponent, formatStorage, formatUsbPorts } from './labels'
@@ -84,7 +86,14 @@ export function ComputerGrid({ rows, rowCount, loading, noRowsLabel }: ComputerG
   const weightUnit = useAppSelector(selectWeightUnit)
   const { openDetails } = useComputerNavigation()
 
+  const comparedIds = useAppSelector(selectComparedIds)
   const columns = useMemo(() => buildColumns(weightUnit, openDetails), [weightUnit, openDetails])
+
+  // Memoized for the same reason as the models below.
+  const selectionModel = useMemo<GridRowSelectionModel>(
+    () => ({ type: 'include', ids: new Set(comparedIds) }),
+    [comparedIds],
+  )
 
   // Memoized: the grid treats a new model object as a new model and syncs its internal state,
   // echoing its stale page back through onPaginationModelChange (which reset paging to page 1).
@@ -123,6 +132,13 @@ export function ComputerGrid({ rows, rowCount, loading, noRowsLabel }: ComputerG
       disableColumnFilter
       disableRowSelectionOnClick
       localeText={{ noRowsLabel }}
+      // Checkboxes pick computers to compare (up to MAX_COMPARED); clicking a row still opens its details.
+      checkboxSelection
+      rowSelectionModel={selectionModel}
+      onRowSelectionModelChange={(model) => dispatch(selectionReplaced([...model.ids].map(Number)))}
+      isRowSelectable={({ id }) => comparedIds.includes(Number(id)) || comparedIds.length < MAX_COMPARED}
+      keepNonExistentRowsSelected // selection survives paging and filtering (rows come from the server)
+      disableRowSelectionExcludeModel // "select all" reports ids, not "all except …"
       onRowClick={({ row }) => openDetails(row.id)}
       sx={{ '& .MuiDataGrid-row': { cursor: 'pointer' } }}
       aria-label="Computers"

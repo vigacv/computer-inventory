@@ -7,6 +7,7 @@ import { AppShell } from './components/AppShell'
 const ComputersPage = lazy(() =>
   import('./features/computers/ComputersPage').then((m) => ({ default: m.ComputersPage })),
 )
+const ComparePage = lazy(() => import('./features/compare/ComparePage').then((m) => ({ default: m.ComparePage })))
 const ComputerDetailsDrawer = lazy(() =>
   import('./features/computers/ComputerDetailsDrawer').then((m) => ({ default: m.ComputerDetailsDrawer })),
 )
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/" element={<ComputersPage />}>
             <Route path="computers/:id" element={<ComputerDetailsDrawer />} />
           </Route>
+          <Route path="/compare" element={<ComparePage />} />
           <Route path="*" element={<Typography>Page not found.</Typography>} />
         </Routes>
       </Suspense>
