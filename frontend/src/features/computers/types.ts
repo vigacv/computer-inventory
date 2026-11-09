@@ -29,6 +29,26 @@ export interface ComputerSummary {
 export interface ComputerDetails extends ComputerSummary {
   createdAt: string
   updatedAt: string
+  /** Opaque concurrency token (base64). Send it back unchanged when updating. */
+  rowVersion: string
+}
+
+/** The editable part of a computer, as the API expects it (canonical units, ids for components). */
+export interface ComputerSpec {
+  ramMb: number
+  storageCapacityGb: number
+  storageType: StorageType
+  weightGrams: number
+  psuWatts: number
+  processorId: number
+  graphicsCardId: number
+  usbPorts: UsbPortInfo[]
+}
+
+export interface UpdateComputerArgs {
+  id: number
+  spec: ComputerSpec
+  rowVersion: string
 }
 
 /** Sort keys the API accepts. */

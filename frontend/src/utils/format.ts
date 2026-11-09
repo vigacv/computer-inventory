@@ -2,7 +2,7 @@
 
 export type WeightUnit = 'kg' | 'lb'
 
-const GRAMS_PER_POUND = 453.59237
+export const GRAMS_PER_POUND = 453.59237
 
 const trim = (n: number, digits = 1) => Number(n.toFixed(digits)).toString()
 

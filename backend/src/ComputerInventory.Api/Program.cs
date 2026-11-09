@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 using ComputerInventory.Api.Common;
 using ComputerInventory.Api.Data;
@@ -10,6 +11,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddSingleton(TimeProvider.System);
+// API messages are always English, whatever the server's locale (FluentValidation localizes by default).
+ValidatorOptions.Global.LanguageManager.Culture = CultureInfo.InvariantCulture;
 builder.Services.AddValidatorsFromAssemblyContaining<Program>(includeInternalTypes: true);
 builder.Services.AddApiCors(builder.Configuration);
 builder.Services.AddApiRateLimiting(builder.Configuration);

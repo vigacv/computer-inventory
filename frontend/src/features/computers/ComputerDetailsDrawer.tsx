@@ -1,7 +1,9 @@
 import CloseIcon from '@mui/icons-material/Close'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import {
   Alert,
   Box,
+  Button,
   Chip,
   Divider,
   Drawer,
@@ -10,7 +12,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useParams } from 'react-router'
 import { getErrorMessage } from '../../api/errors'
 import { useAppSelector } from '../../app/hooks'
@@ -19,6 +21,7 @@ import { formatDateTime, formatRam, formatWatts, formatWeight } from '../../util
 import { selectWeightUnit } from '../preferences/preferencesSlice'
 import { WeightUnitToggle } from '../preferences/WeightUnitToggle'
 import { useGetComputerQuery } from './computersApi'
+import { EditComputerDialog } from './EditComputerDialog'
 import { formatStorage, usbPortTypeLabels } from './labels'
 import type { ComputerDetails } from './types'
 import { useComputerNavigation } from './useComputerNavigation'
@@ -111,6 +114,7 @@ export function ComputerDetailsDrawer() {
   const validId = Number.isInteger(id) && id > 0
   const { closeDetails } = useComputerNavigation()
   const { data, isLoading, isError, error, refetch } = useGetComputerQuery(id, { skip: !validId })
+  const [editing, setEditing] = useState(false)
 
   const notFound = !validId || (isError && 'status' in error && error.status === 404)
   const titleId = 'computer-details-title'
@@ -133,6 +137,11 @@ export function ComputerDetailsDrawer() {
             </Typography>
           )}
         </Box>
+        {data && (
+          <Button startIcon={<EditOutlinedIcon />} onClick={() => setEditing(true)}>
+            Edit
+          </Button>
+        )}
         <IconButton aria-label="Close details" onClick={closeDetails} edge="end">
           <CloseIcon />
         </IconButton>
@@ -150,6 +159,10 @@ export function ComputerDetailsDrawer() {
           <Details computer={data} />
         )}
       </Box>
+
+      {editing && data && (
+        <EditComputerDialog computer={data} onClose={() => setEditing(false)} onReload={refetch} />
+      )}
     </Drawer>
   )
 }

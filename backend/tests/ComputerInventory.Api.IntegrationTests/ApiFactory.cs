@@ -3,6 +3,7 @@ using ComputerInventory.Api.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Testcontainers.MsSql;
@@ -32,8 +33,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     public JsonSerializerOptions JsonOptions =>
         Services.GetRequiredService<IOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>>().Value.SerializerOptions;
 
+    /// <summary>A context configured exactly like the app's. Dispose it when done.</summary>
     public AppDbContext CreateDbContext() =>
-        Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>();
+        new(new DbContextOptionsBuilder<AppDbContext>().UseSqlServer(ConnectionString).Options);
 
     public Task InitializeAsync() => _database.StartAsync();
 

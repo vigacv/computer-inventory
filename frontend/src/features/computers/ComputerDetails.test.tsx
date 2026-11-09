@@ -2,30 +2,12 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import App from '../../App'
-import { computerFixture, pageOf } from '../../test/fixtures/computers'
+import { computerFixture, detailsFixture, pageOf } from '../../test/fixtures/computers'
 import { LocationProbe } from '../../test/LocationProbe'
 import { renderWithProviders } from '../../test/render'
 import { server } from '../../test/server'
-import type { ComputerDetails } from './types'
 
-const details: ComputerDetails = {
-  ...computerFixture({
-    id: 5,
-    ramMb: 32768,
-    storageCapacityGb: 750,
-    weightGrams: 7000,
-    psuWatts: 1000,
-    processor: { id: 5, manufacturer: 'AMD', model: 'FX-8370' },
-    graphicsCard: { id: 5, manufacturer: 'AMD', model: 'Radeon RX 480' },
-    usbPorts: [
-      { type: 'Usb2', count: 2 },
-      { type: 'Usb3', count: 2 },
-      { type: 'UsbC', count: 1 },
-    ],
-  }),
-  createdAt: '2026-11-09T01:13:52+00:00',
-  updatedAt: '2026-11-10T09:30:00+00:00',
-}
+const details = detailsFixture()
 
 function mockApi() {
   server.use(

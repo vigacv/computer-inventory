@@ -7,7 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ComputerInventory.Api.Features.Computers;
 
-/// <summary>A single computer with everything the details view shows.</summary>
+/// <summary>
+/// A single computer with everything the details view and edit form need. <c>RowVersion</c>
+/// (base64 in JSON) must be sent back when updating, to detect concurrent edits.
+/// </summary>
 public static class GetComputer
 {
     public sealed record Response(
@@ -21,7 +24,8 @@ public static class GetComputer
         ComponentInfo GraphicsCard,
         IReadOnlyList<UsbPortInfo> UsbPorts,
         DateTimeOffset CreatedAt,
-        DateTimeOffset UpdatedAt)
+        DateTimeOffset UpdatedAt,
+        byte[] RowVersion)
     {
         public static readonly Expression<Func<Computer, Response>> Projection = c => new Response(
             c.Id,
@@ -37,7 +41,8 @@ public static class GetComputer
                 .Select(p => new UsbPortInfo(p.PortType, p.Count))
                 .ToList(),
             c.CreatedAt,
-            c.UpdatedAt);
+            c.UpdatedAt,
+            c.RowVersion);
     }
 
     public sealed class Endpoint : IEndpoint
