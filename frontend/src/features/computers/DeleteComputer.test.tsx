@@ -76,7 +76,7 @@ describe('Delete computer', () => {
     expect(detailRequestsAfterDelete).toBe(0) // no refetch of the deleted computer (it would 404)
   })
 
-  it('reports a failed delete and brings the details back', async () => {
+  it('reports a failed delete and keeps the details open', async () => {
     mockApi(() => HttpResponse.json({ title: 'Server error', detail: 'Database unavailable' }, { status: 500 }))
     const confirm = await askToDelete()
 

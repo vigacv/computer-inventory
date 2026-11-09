@@ -36,14 +36,10 @@ export const computersApi = baseApi.injectEndpoints({
     }),
     deleteComputer: build.mutation<void, number>({
       query: (id) => ({ url: `/computers/${id}`, method: 'DELETE' }),
-      // Refetch lists, and its own details so a revisit (e.g. browser back) shows it's gone.
-      invalidatesTags: (_result, error, id) =>
-        error
-          ? []
-          : [
-              { type: 'Computer', id: 'LIST' },
-              { type: 'Computer', id },
-            ],
+      // Only lists are refetched. Its own details aren't invalidated: that would make RTK Query
+      // refetch them (a 404) if anything still shows them. The details close with history
+      // `replace`, and the unused cache entry expires by itself.
+      invalidatesTags: (_result, error) => (error ? [] : [{ type: 'Computer', id: 'LIST' }]),
     }),
   }),
 })

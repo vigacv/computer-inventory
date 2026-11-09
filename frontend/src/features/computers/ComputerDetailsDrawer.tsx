@@ -115,26 +115,19 @@ function LoadingDetails() {
 export function ComputerDetailsDrawer() {
   const id = Number(useParams().id)
   const validId = Number.isInteger(id) && id > 0
-  const { openDetails, closeDetails } = useComputerNavigation()
+  const { closeDetails } = useComputerNavigation()
   const { data, isLoading, isError, error, refetch } = useGetComputerQuery(id, { skip: !validId })
   const [editing, setEditing] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
-  const [deleteComputer] = useDeleteComputerMutation()
+  const [deleteComputer, { isLoading: deleting }] = useDeleteComputerMutation()
   const { enqueueSnackbar } = useSnackbar()
 
   const handleDelete = async () => {
-    // Close the details before deleting. Deleting invalidates this computer's cached details:
-    // while the drawer still shows them, RTK Query would refetch them (a needless 404); once
-    // nothing shows them, it just drops them from the cache.
-    setConfirmingDelete(false)
-    closeDetails({ replace: true }) // replace: Back shouldn't lead to the deleted computer
-
     const result = await deleteComputer(id)
-    if ('error' in result) {
-      openDetails(id, { replace: true }) // bring the details back; the error snackbar comes from the API middleware
-      return
-    }
+    setConfirmingDelete(false)
+    if ('error' in result) return // the error snackbar comes from the API middleware; details stay open
     enqueueSnackbar(`Computer #${id} deleted.`, { variant: 'success' })
+    closeDetails({ replace: true }) // replace: Back shouldn't lead to the deleted computer
   }
 
   const notFound = !validId || (isError && 'status' in error && error.status === 404)
@@ -192,6 +185,7 @@ export function ComputerDetailsDrawer() {
           message="This permanently removes the computer and its specs. It can't be undone."
           confirmLabel="Delete"
           destructive
+          busy={deleting}
           onConfirm={handleDelete}
           onCancel={() => setConfirmingDelete(false)}
         />
