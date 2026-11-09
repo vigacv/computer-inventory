@@ -26,6 +26,9 @@ trim_trailing_whitespace = false
 generated_code = true
 dotnet_analyzer_diagnostic.severity = none
 
-# Test names use underscores for readability (Method_scenario_expected)
+# Tests favour readability over micro-optimisation
 [**/tests/**/*.cs]
+# Test names use underscores (Method_scenario_expected)
 dotnet_diagnostic.CA1707.severity = none
+# Inline expected arrays are clearer than static readonly fields
+dotnet_diagnostic.CA1861.severity = none

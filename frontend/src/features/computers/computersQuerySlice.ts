@@ -1,13 +1,26 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { ComputerSortField, SearchComputersArgs, SortDirection } from './types'
+import type { ComputerFilters, ComputerSortField, SearchComputersArgs, SortDirection } from './types'
 
 /**
- * What the user is currently looking at in the computers list: page and sort for now,
- * search and filters later. Kept in Redux so the grid, the filter bar and the URL can share it.
+ * What the user is currently looking at in the computers list: search, filters, sort and page.
+ * Kept in Redux so the filter bar, the grid and the URL all share one source of truth.
  */
 export type ComputersQueryState = SearchComputersArgs
 
 export const initialComputersQuery: ComputersQueryState = { page: 1, pageSize: 25 }
+
+export const filterKeys = [
+  'search',
+  'minRamMb',
+  'maxRamMb',
+  'minStorageGb',
+  'maxStorageGb',
+  'storageType',
+  'processorManufacturerId',
+  'graphicsCardManufacturerId',
+  'usbPortType',
+  'minPsuWatts',
+] as const satisfies readonly (keyof ComputerFilters)[]
 
 export const computersQuerySlice = createSlice({
   name: 'computersQuery',
@@ -23,11 +36,30 @@ export const computersQuerySlice = createSlice({
       state.sortDir = action.payload?.sortDir
       state.page = 1
     },
+    /** Sets the given filters; `undefined` (or an empty search) clears one. Results start again from page 1. */
+    filtersChanged(state, action: PayloadAction<ComputerFilters>) {
+      for (const [key, value] of Object.entries(action.payload)) {
+        const empty = value === undefined || (typeof value === 'string' && value.trim() === '')
+        if (empty) delete state[key as keyof ComputerFilters]
+        else Object.assign(state, { [key]: typeof value === 'string' ? value.trim() : value })
+      }
+      state.page = 1
+    },
+    /** Clears search and filters but keeps sort and page size. */
+    filtersCleared(state) {
+      for (const key of filterKeys) delete state[key]
+      state.page = 1
+    },
+    /** Replaces the whole query, e.g. when restoring it from the URL. */
+    queryReplaced(_state, action: PayloadAction<ComputersQueryState>) {
+      return action.payload
+    },
   },
   selectors: {
     selectComputersQuery: (state) => state,
+    selectActiveFilterCount: (state) => filterKeys.filter((key) => state[key] !== undefined).length,
   },
 })
 
-export const { pageChanged, sortChanged } = computersQuerySlice.actions
-export const { selectComputersQuery } = computersQuerySlice.selectors
+export const { pageChanged, sortChanged, filtersChanged, filtersCleared, queryReplaced } = computersQuerySlice.actions
+export const { selectComputersQuery, selectActiveFilterCount } = computersQuerySlice.selectors

@@ -36,7 +36,21 @@ export type ComputerSortField =
 
 export type SortDirection = 'asc' | 'desc'
 
-export interface SearchComputersArgs {
+/** Optional filters, combined with AND by the API. Measurements in canonical units. */
+export interface ComputerFilters {
+  search?: string
+  minRamMb?: number
+  maxRamMb?: number
+  minStorageGb?: number
+  maxStorageGb?: number
+  storageType?: StorageType
+  processorManufacturerId?: number
+  graphicsCardManufacturerId?: number
+  usbPortType?: UsbPortType
+  minPsuWatts?: number
+}
+
+export interface SearchComputersArgs extends ComputerFilters {
   page: number
   pageSize: number
   sortBy?: ComputerSortField

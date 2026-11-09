@@ -15,6 +15,8 @@ public sealed class GetLookupsTests(ApiFactory factory)
 
         Assert.NotNull(lookups);
         Assert.Equal(["AMD", "Intel", "NVIDIA"], lookups.Manufacturers.Select(m => m.Name));
+        Assert.Equal(["AMD", "Intel"], lookups.Manufacturers.Where(m => m.MakesProcessors).Select(m => m.Name));
+        Assert.Equal(["AMD", "NVIDIA"], lookups.Manufacturers.Where(m => m.MakesGraphicsCards).Select(m => m.Name));
         Assert.Equal([StorageType.Hdd, StorageType.Ssd], lookups.StorageTypes);
         Assert.Equal([UsbPortType.Usb2, UsbPortType.Usb3, UsbPortType.UsbC], lookups.UsbPortTypes);
     }

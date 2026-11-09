@@ -51,10 +51,11 @@ interface ComputerGridProps {
   rows: ComputerSummary[]
   rowCount: number
   loading: boolean
+  noRowsLabel: string
 }
 
 /** Server-side paged and sorted grid. Paging/sort state lives in Redux, not in the grid. */
-export function ComputerGrid({ rows, rowCount, loading }: ComputerGridProps) {
+export function ComputerGrid({ rows, rowCount, loading, noRowsLabel }: ComputerGridProps) {
   const dispatch = useAppDispatch()
   const query = useAppSelector(selectComputersQuery)
 
@@ -86,6 +87,7 @@ export function ComputerGrid({ rows, rowCount, loading }: ComputerGridProps) {
       pageSizeOptions={PAGE_SIZE_OPTIONS}
       disableColumnFilter
       disableRowSelectionOnClick
+      localeText={{ noRowsLabel }}
       aria-label="Computers"
     />
   )

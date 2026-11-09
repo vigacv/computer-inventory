@@ -9,7 +9,7 @@ namespace ComputerInventory.Api.Features.Lookups;
 /// <summary>Reference data for filters and forms, in a single round trip.</summary>
 public static class GetLookups
 {
-    public sealed record ManufacturerItem(int Id, string Name);
+    public sealed record ManufacturerItem(int Id, string Name, bool MakesProcessors, bool MakesGraphicsCards);
 
     public sealed record Response(
         IReadOnlyList<ManufacturerItem> Manufacturers,
@@ -29,7 +29,7 @@ public static class GetLookups
         var manufacturers = await db.Manufacturers
             .AsNoTracking()
             .OrderBy(m => m.Name)
-            .Select(m => new ManufacturerItem(m.Id, m.Name))
+            .Select(m => new ManufacturerItem(m.Id, m.Name, m.Processors.Any(), m.GraphicsCards.Any()))
             .ToListAsync(ct);
 
         return TypedResults.Ok(new Response(manufacturers, Enum.GetValues<StorageType>(), Enum.GetValues<UsbPortType>()));
