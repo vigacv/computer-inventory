@@ -16,3 +16,8 @@ export const formatWeight = (grams: number, unit: WeightUnit = 'kg') =>
   unit === 'kg' ? `${trim(grams / 1000)} kg` : `${trim(grams / GRAMS_PER_POUND)} lb`
 
 export const formatWatts = (watts: number) => `${watts} W`
+
+const dateTimeFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+
+/** ISO timestamp in the user's locale and time zone, e.g. "9 Nov 2026, 01:13". */
+export const formatDateTime = (iso: string) => dateTimeFormat.format(new Date(iso))

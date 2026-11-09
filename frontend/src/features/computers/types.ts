@@ -25,6 +25,12 @@ export interface ComputerSummary {
   usbPorts: UsbPortInfo[]
 }
 
+/** Mirrors the API's GetComputer.Response. */
+export interface ComputerDetails extends ComputerSummary {
+  createdAt: string
+  updatedAt: string
+}
+
 /** Sort keys the API accepts. */
 export type ComputerSortField =
   | 'processor'

@@ -1,4 +1,4 @@
-import { formatCapacity, formatRam, formatWatts, formatWeight } from './format'
+import { formatCapacity, formatDateTime, formatRam, formatWatts, formatWeight } from './format'
 
 describe('format', () => {
   it.each([
@@ -21,4 +21,11 @@ describe('format', () => {
   })
 
   it('formats watts', () => expect(formatWatts(500)).toBe('500 W'))
+
+  it('formats timestamps in the local time zone', () => {
+    const iso = '2026-11-09T01:13:52+00:00'
+    const expected = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso))
+    expect(formatDateTime(iso)).toBe(expected)
+    expect(formatDateTime(iso)).toMatch(/2026/)
+  })
 })

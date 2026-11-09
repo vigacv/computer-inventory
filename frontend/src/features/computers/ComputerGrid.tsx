@@ -1,19 +1,25 @@
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import {
   DataGrid,
+  GridActionsCellItem,
   type GridColDef,
   type GridPaginationModel,
   type GridSortModel,
 } from '@mui/x-data-grid'
+import { useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
-import { formatRam, formatWatts, formatWeight } from '../../utils/format'
+import { formatRam, formatWatts, formatWeight, type WeightUnit } from '../../utils/format'
+import { selectWeightUnit } from '../preferences/preferencesSlice'
+import { usePrefetch } from './computersApi'
 import { pageChanged, selectComputersQuery, sortChanged } from './computersQuerySlice'
 import { formatComponent, formatStorage, formatUsbPorts } from './labels'
 import type { ComputerSortField, ComputerSummary } from './types'
+import { useComputerNavigation } from './useComputerNavigation'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
 
 // Column fields match the API's sort keys, so the sort model maps straight onto the query.
-const columns: GridColDef<ComputerSummary>[] = [
+const buildColumns = (weightUnit: WeightUnit, openDetails: (id: number) => void): GridColDef<ComputerSummary>[] => [
   {
     field: 'processor',
     headerName: 'Processor',
@@ -43,8 +49,26 @@ const columns: GridColDef<ComputerSummary>[] = [
     sortable: false,
     valueGetter: (_, row) => formatUsbPorts(row.usbPorts),
   },
-  { field: 'weightGrams', headerName: 'Weight', width: 100, valueFormatter: (value: number) => formatWeight(value) },
+  {
+    field: 'weightGrams',
+    headerName: 'Weight',
+    width: 100,
+    valueFormatter: (value: number) => formatWeight(value, weightUnit),
+  },
   { field: 'psuWatts', headerName: 'PSU', width: 90, valueFormatter: (value: number) => formatWatts(value) },
+  {
+    field: 'actions',
+    type: 'actions',
+    width: 60,
+    getActions: ({ row }) => [
+      <GridActionsCellItem
+        key="details"
+        icon={<VisibilityOutlinedIcon />}
+        label={`View details of computer ${row.id}`}
+        onClick={() => openDetails(row.id)}
+      />,
+    ],
+  },
 ]
 
 interface ComputerGridProps {
@@ -58,6 +82,11 @@ interface ComputerGridProps {
 export function ComputerGrid({ rows, rowCount, loading, noRowsLabel }: ComputerGridProps) {
   const dispatch = useAppDispatch()
   const query = useAppSelector(selectComputersQuery)
+  const weightUnit = useAppSelector(selectWeightUnit)
+  const { openDetails } = useComputerNavigation()
+  const prefetchDetails = usePrefetch('getComputer')
+
+  const columns = useMemo(() => buildColumns(weightUnit, openDetails), [weightUnit, openDetails])
 
   const paginationModel: GridPaginationModel = { page: query.page - 1, pageSize: query.pageSize }
   const sortModel: GridSortModel = query.sortBy ? [{ field: query.sortBy, sort: query.sortDir ?? 'asc' }] : []
@@ -88,6 +117,17 @@ export function ComputerGrid({ rows, rowCount, loading, noRowsLabel }: ComputerG
       disableColumnFilter
       disableRowSelectionOnClick
       localeText={{ noRowsLabel }}
+      onRowClick={({ row }) => openDetails(row.id)}
+      slotProps={{
+        row: {
+          // Start loading details on hover, so the drawer usually opens with data ready.
+          onMouseEnter: (event) => {
+            const id = Number(event.currentTarget.dataset.id)
+            if (id) prefetchDetails(id, { ifOlderThan: 60 })
+          },
+        },
+      }}
+      sx={{ '& .MuiDataGrid-row': { cursor: 'pointer' } }}
       aria-label="Computers"
     />
   )

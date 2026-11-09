@@ -1,6 +1,12 @@
 import { useLocation } from 'react-router'
 
-/** Renders the router's current query string so tests can assert on URL changes. */
+/** Renders the router's current location so tests can assert on navigation and URL changes. */
 export function LocationProbe() {
-  return <output data-testid="location">{useLocation().search}</output>
+  const { pathname, search } = useLocation()
+  return (
+    <>
+      <output data-testid="location">{search}</output>
+      <output data-testid="pathname">{pathname}</output>
+    </>
+  )
 }

@@ -1,7 +1,10 @@
 import { Paper, Stack, Typography } from '@mui/material'
+import { Suspense } from 'react'
+import { Outlet } from 'react-router'
 import { getErrorMessage } from '../../api/errors'
 import { useAppSelector } from '../../app/hooks'
 import { ErrorState } from '../../components/ErrorState'
+import { WeightUnitToggle } from '../preferences/WeightUnitToggle'
 import { ComputerFilters } from './ComputerFilters'
 import { useSearchComputersQuery } from './computersApi'
 import { selectActiveFilterCount, selectComputersQuery } from './computersQuerySlice'
@@ -20,8 +23,8 @@ export function ComputersPage() {
 
   return (
     <Stack spacing={2}>
-      <Stack direction="row" sx={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <Typography variant="h5" component="h2">
+      <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+        <Typography variant="h5" component="h2" sx={{ flexGrow: 1 }}>
           Computers
         </Typography>
         {data && (
@@ -29,6 +32,7 @@ export function ComputersPage() {
             {countLabel}
           </Typography>
         )}
+        <WeightUnitToggle />
       </Stack>
 
       <ComputerFilters />
@@ -43,6 +47,12 @@ export function ComputersPage() {
           noRowsLabel={filtering ? 'No computers match your search and filters.' : 'No computers yet.'}
         />
       </Paper>
+
+      {/* Details drawer for /computers/:id renders here, over the list. Its own Suspense boundary
+          keeps the list visible while the drawer's code loads. */}
+      <Suspense fallback={null}>
+        <Outlet />
+      </Suspense>
     </Stack>
   )
 }
