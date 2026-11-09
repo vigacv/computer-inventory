@@ -1,4 +1,4 @@
-using ComputerInventory.Api.Domain;
+using ComputerInventory.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,7 +14,7 @@ internal sealed class ComputerConfiguration : IEntityTypeConfiguration<Computer>
             t.HasCheckConstraint("CK_Computers_StorageCapacityGb", "[StorageCapacityGb] > 0");
             t.HasCheckConstraint("CK_Computers_WeightGrams", "[WeightGrams] > 0");
             t.HasCheckConstraint("CK_Computers_PsuWatts", "[PsuWatts] > 0");
-            t.HasCheckConstraint("CK_Computers_StorageType", "[StorageType] IN ('Hdd', 'Ssd')");
+            t.HasCheckConstraint("CK_Computers_StorageType", CheckConstraints.InEnum<StorageType>(nameof(Computer.StorageType)));
         });
 
         builder.Property(c => c.StorageType).HasConversion<string>().HasMaxLength(10);
@@ -34,10 +34,5 @@ internal sealed class ComputerConfiguration : IEntityTypeConfiguration<Computer>
             .WithOne()
             .HasForeignKey(p => p.ComputerId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        // Columns used by range filters / sorting.
-        builder.HasIndex(c => c.RamMb);
-        builder.HasIndex(c => c.StorageCapacityGb);
-        builder.HasIndex(c => c.PsuWatts);
     }
 }

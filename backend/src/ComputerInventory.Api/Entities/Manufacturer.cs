@@ -1,4 +1,4 @@
-namespace ComputerInventory.Api.Domain;
+namespace ComputerInventory.Api.Entities;
 
 /// <summary>
 /// A hardware vendor. Shared by processors and graphics cards (e.g. AMD makes both),

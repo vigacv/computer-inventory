@@ -1,4 +1,4 @@
-using ComputerInventory.Api.Domain;
+using ComputerInventory.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

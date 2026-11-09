@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ComputerInventory.Api.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261109004529_InitialCreate")]
+    [Migration("20261109011347_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace ComputerInventory.Api.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ComputerInventory.Api.Domain.Computer", b =>
+            modelBuilder.Entity("ComputerInventory.Api.Entities.Computer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -74,12 +74,6 @@ namespace ComputerInventory.Api.Data.Migrations
 
                     b.HasIndex("ProcessorId");
 
-                    b.HasIndex("PsuWatts");
-
-                    b.HasIndex("RamMb");
-
-                    b.HasIndex("StorageCapacityGb");
-
                     b.ToTable("Computers", t =>
                         {
                             t.HasCheckConstraint("CK_Computers_PsuWatts", "[PsuWatts] > 0");
@@ -94,7 +88,7 @@ namespace ComputerInventory.Api.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ComputerInventory.Api.Domain.ComputerUsbPort", b =>
+            modelBuilder.Entity("ComputerInventory.Api.Entities.ComputerUsbPort", b =>
                 {
                     b.Property<int>("ComputerId")
                         .HasColumnType("int");
@@ -108,8 +102,6 @@ namespace ComputerInventory.Api.Data.Migrations
 
                     b.HasKey("ComputerId", "PortType");
 
-                    b.HasIndex("PortType");
-
                     b.ToTable("ComputerUsbPorts", t =>
                         {
                             t.HasCheckConstraint("CK_ComputerUsbPorts_Count", "[Count] > 0");
@@ -118,7 +110,7 @@ namespace ComputerInventory.Api.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ComputerInventory.Api.Domain.GraphicsCard", b =>
+            modelBuilder.Entity("ComputerInventory.Api.Entities.GraphicsCard", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -142,7 +134,7 @@ namespace ComputerInventory.Api.Data.Migrations
                     b.ToTable("GraphicsCards");
                 });
 
-            modelBuilder.Entity("ComputerInventory.Api.Domain.Manufacturer", b =>
+            modelBuilder.Entity("ComputerInventory.Api.Entities.Manufacturer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -163,7 +155,7 @@ namespace ComputerInventory.Api.Data.Migrations
                     b.ToTable("Manufacturers");
                 });
 
-            modelBuilder.Entity("ComputerInventory.Api.Domain.Processor", b =>
+            modelBuilder.Entity("ComputerInventory.Api.Entities.Processor", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -187,15 +179,15 @@ namespace ComputerInventory.Api.Data.Migrations
                     b.ToTable("Processors");
                 });
 
-            modelBuilder.Entity("ComputerInventory.Api.Domain.Computer", b =>
+            modelBuilder.Entity("ComputerInventory.Api.Entities.Computer", b =>
                 {
-                    b.HasOne("ComputerInventory.Api.Domain.GraphicsCard", "GraphicsCard")
+                    b.HasOne("ComputerInventory.Api.Entities.GraphicsCard", "GraphicsCard")
                         .WithMany()
                         .HasForeignKey("GraphicsCardId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("ComputerInventory.Api.Domain.Processor", "Processor")
+                    b.HasOne("ComputerInventory.Api.Entities.Processor", "Processor")
                         .WithMany()
                         .HasForeignKey("ProcessorId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -206,18 +198,18 @@ namespace ComputerInventory.Api.Data.Migrations
                     b.Navigation("Processor");
                 });
 
-            modelBuilder.Entity("ComputerInventory.Api.Domain.ComputerUsbPort", b =>
+            modelBuilder.Entity("ComputerInventory.Api.Entities.ComputerUsbPort", b =>
                 {
-                    b.HasOne("ComputerInventory.Api.Domain.Computer", null)
+                    b.HasOne("ComputerInventory.Api.Entities.Computer", null)
                         .WithMany("UsbPorts")
                         .HasForeignKey("ComputerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ComputerInventory.Api.Domain.GraphicsCard", b =>
+            modelBuilder.Entity("ComputerInventory.Api.Entities.GraphicsCard", b =>
                 {
-                    b.HasOne("ComputerInventory.Api.Domain.Manufacturer", "Manufacturer")
+                    b.HasOne("ComputerInventory.Api.Entities.Manufacturer", "Manufacturer")
                         .WithMany("GraphicsCards")
                         .HasForeignKey("ManufacturerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -226,9 +218,9 @@ namespace ComputerInventory.Api.Data.Migrations
                     b.Navigation("Manufacturer");
                 });
 
-            modelBuilder.Entity("ComputerInventory.Api.Domain.Processor", b =>
+            modelBuilder.Entity("ComputerInventory.Api.Entities.Processor", b =>
                 {
-                    b.HasOne("ComputerInventory.Api.Domain.Manufacturer", "Manufacturer")
+                    b.HasOne("ComputerInventory.Api.Entities.Manufacturer", "Manufacturer")
                         .WithMany("Processors")
                         .HasForeignKey("ManufacturerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -237,12 +229,12 @@ namespace ComputerInventory.Api.Data.Migrations
                     b.Navigation("Manufacturer");
                 });
 
-            modelBuilder.Entity("ComputerInventory.Api.Domain.Computer", b =>
+            modelBuilder.Entity("ComputerInventory.Api.Entities.Computer", b =>
                 {
                     b.Navigation("UsbPorts");
                 });
 
-            modelBuilder.Entity("ComputerInventory.Api.Domain.Manufacturer", b =>
+            modelBuilder.Entity("ComputerInventory.Api.Entities.Manufacturer", b =>
                 {
                     b.Navigation("GraphicsCards");
 

@@ -1,6 +1,6 @@
-namespace ComputerInventory.Api.Domain;
+namespace ComputerInventory.Api.Entities;
 
-public class Processor
+public class GraphicsCard
 {
     public int Id { get; set; }
     public int ManufacturerId { get; set; }

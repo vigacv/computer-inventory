@@ -1,3 +1,4 @@
+using ComputerInventory.Api.Data.Interceptors;
 using ComputerInventory.Api.Data.Seed;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,8 +11,10 @@ public static partial class DatabaseExtensions
         var connectionString = configuration.GetConnectionString("Default")
             ?? throw new InvalidOperationException("Connection string 'Default' is not configured.");
 
-        services.AddDbContext<AppDbContext>(options => options
+        services.AddSingleton<AuditableInterceptor>();
+        services.AddDbContext<AppDbContext>((sp, options) => options
             .UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure())
+            .AddInterceptors(sp.GetRequiredService<AuditableInterceptor>())
             .UseAsyncSeeding((context, _, ct) => SeedData.SeedAsync(context, ct))
             .UseSeeding((context, _) => SeedData.SeedAsync(context).GetAwaiter().GetResult()));
 

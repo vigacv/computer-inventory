@@ -135,26 +135,6 @@ namespace ComputerInventory.Api.Data.Migrations
                 column: "ProcessorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Computers_PsuWatts",
-                table: "Computers",
-                column: "PsuWatts");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Computers_RamMb",
-                table: "Computers",
-                column: "RamMb");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Computers_StorageCapacityGb",
-                table: "Computers",
-                column: "StorageCapacityGb");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ComputerUsbPorts_PortType",
-                table: "ComputerUsbPorts",
-                column: "PortType");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_GraphicsCards_ManufacturerId_Model",
                 table: "GraphicsCards",
                 columns: new[] { "ManufacturerId", "Model" },

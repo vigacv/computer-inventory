@@ -1,4 +1,4 @@
-using ComputerInventory.Api.Domain;
+using ComputerInventory.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,10 +15,7 @@ internal sealed class ComputerUsbPortConfiguration : IEntityTypeConfiguration<Co
         builder.ToTable(t =>
         {
             t.HasCheckConstraint("CK_ComputerUsbPorts_Count", "[Count] > 0");
-            t.HasCheckConstraint("CK_ComputerUsbPorts_PortType", "[PortType] IN ('Usb2', 'Usb3', 'UsbC')");
+            t.HasCheckConstraint("CK_ComputerUsbPorts_PortType", CheckConstraints.InEnum<UsbPortType>(nameof(ComputerUsbPort.PortType)));
         });
-
-        // Supports "has at least one port of type X" filters.
-        builder.HasIndex(p => p.PortType);
     }
 }

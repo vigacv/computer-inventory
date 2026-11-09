@@ -1,4 +1,4 @@
-namespace ComputerInventory.Api.Domain;
+namespace ComputerInventory.Api.Entities;
 
 /// <summary>How many ports of a given USB type a computer has.</summary>
 public class ComputerUsbPort

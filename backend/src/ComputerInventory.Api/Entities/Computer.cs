@@ -1,10 +1,10 @@
-namespace ComputerInventory.Api.Domain;
+namespace ComputerInventory.Api.Entities;
 
 /// <summary>
 /// A computer's specification. All measurements are stored in a single canonical unit
 /// so they can be compared, sorted and range-filtered; formatting happens at the edges.
 /// </summary>
-public class Computer
+public class Computer : IAuditable
 {
     public int Id { get; set; }
 
