@@ -59,6 +59,28 @@ describe('ComputersPage', () => {
     expect(store.getState().computersQuery).toMatchObject({ sortBy: 'ramMb', sortDir: 'asc', page: 1 })
   })
 
+  it('moves to the next page and stays there', async () => {
+    const all = Array.from({ length: 11 }, (_, i) =>
+      computerFixture({ id: i + 1, processor: { id: 1, manufacturer: 'Intel', model: `CPU ${i + 1}` } }),
+    )
+    server.use(
+      http.get('*/api/computers', ({ request }) => {
+        const params = new URL(request.url).searchParams
+        const page = Number(params.get('page') ?? 1)
+        const size = Number(params.get('pageSize') ?? 25)
+        return HttpResponse.json(pageOf(all.slice((page - 1) * size, page * size), page, size, all.length))
+      }),
+    )
+    const { store } = renderWithProviders(<ComputersPage />, { route: '/?pageSize=10' })
+    await screen.findByText('Intel CPU 1')
+
+    await userEvent.click(screen.getByRole('button', { name: /next page/i }))
+
+    expect(await screen.findByText('Intel CPU 11')).toBeInTheDocument()
+    expect(screen.queryByText('Intel CPU 1')).not.toBeInTheDocument()
+    expect(store.getState().computersQuery.page).toBe(2)
+  })
+
   it('shows an error with a retry when the API fails', async () => {
     let calls = 0
     server.use(

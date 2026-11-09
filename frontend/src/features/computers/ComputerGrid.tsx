@@ -86,8 +86,16 @@ export function ComputerGrid({ rows, rowCount, loading, noRowsLabel }: ComputerG
 
   const columns = useMemo(() => buildColumns(weightUnit, openDetails), [weightUnit, openDetails])
 
-  const paginationModel: GridPaginationModel = { page: query.page - 1, pageSize: query.pageSize }
-  const sortModel: GridSortModel = query.sortBy ? [{ field: query.sortBy, sort: query.sortDir ?? 'asc' }] : []
+  // Memoized: the grid treats a new model object as a new model and syncs its internal state,
+  // echoing its stale page back through onPaginationModelChange (which reset paging to page 1).
+  const paginationModel = useMemo<GridPaginationModel>(
+    () => ({ page: query.page - 1, pageSize: query.pageSize }),
+    [query.page, query.pageSize],
+  )
+  const sortModel = useMemo<GridSortModel>(
+    () => (query.sortBy ? [{ field: query.sortBy, sort: query.sortDir ?? 'asc' }] : []),
+    [query.sortBy, query.sortDir],
+  )
 
   const handlePaginationChange = (model: GridPaginationModel) =>
     dispatch(pageChanged({ page: model.page + 1, pageSize: model.pageSize }))
